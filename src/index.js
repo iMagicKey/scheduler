@@ -16,7 +16,7 @@ export class Scheduler {
 
     schedule(name, fn, { interval, timeout = DEFAULT_TASK_TIMEOUT, runImmediately = true } = {}) {
         if (typeof fn !== 'function') throw new TypeError(`Task "${name}" fn must be a function`)
-        if (typeof interval !== 'number' || interval <= 0) throw new TypeError(`Task "${name}" interval must be a positive number`)
+        if (!Number.isFinite(interval) || interval <= 0) throw new TypeError(`Task "${name}" interval must be a positive number`)
         if (name in this.#tasks) throw new Error(`Task "${name}" is already scheduled`)
 
         this.#tasks[name] = {

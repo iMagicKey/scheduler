@@ -36,6 +36,12 @@ describe('Scheduler', () => {
         it('throws if interval is invalid', () => {
             expect(() => scheduler.schedule('bad', async () => {}, { interval: -1 })).to.throw(TypeError)
         })
+        it('throws if interval is NaN', () => {
+            expect(() => scheduler.schedule('nan-task', async () => {}, { interval: NaN })).to.throw(TypeError)
+        })
+        it('throws if interval is Infinity', () => {
+            expect(() => scheduler.schedule('inf-task', async () => {}, { interval: Infinity })).to.throw(TypeError)
+        })
         it('throws if task name is already registered', () => {
             scheduler.schedule('dup', async () => {}, { interval: 100 })
             expect(() => scheduler.schedule('dup', async () => {}, { interval: 100 })).to.throw(Error)
@@ -59,7 +65,13 @@ describe('Scheduler', () => {
 
         it('stops a running task after unschedule', async () => {
             let count = 0
-            scheduler.schedule('live', async () => { count++ }, { interval: 10, runImmediately: true })
+            scheduler.schedule(
+                'live',
+                async () => {
+                    count++
+                },
+                { interval: 10, runImmediately: true }
+            )
             scheduler.start()
             await new Promise((resolve) => setTimeout(resolve, 25))
             scheduler.unschedule('live')
@@ -96,7 +108,13 @@ describe('Scheduler', () => {
         })
         it('restart: start → stop → start resumes task execution', async () => {
             let count = 0
-            scheduler.schedule('restart-task', async () => { count++ }, { interval: 10, runImmediately: true })
+            scheduler.schedule(
+                'restart-task',
+                async () => {
+                    count++
+                },
+                { interval: 10, runImmediately: true }
+            )
             scheduler.start()
             await new Promise((resolve) => setTimeout(resolve, 25))
             scheduler.stop()
@@ -220,7 +238,6 @@ describe('Scheduler', () => {
         })
 
         it('returns empty object when no tasks registered', () => {
-            const s = new Scheduler()
             expect(scheduler.getStatus()).to.be.an('object')
         })
 
