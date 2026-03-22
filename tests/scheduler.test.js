@@ -52,6 +52,28 @@ describe('Scheduler', () => {
             scheduler.unschedule('rem')
             expect(scheduler.getStatus().rem).to.be.undefined
         })
+
+        it('no-ops on unknown task name', () => {
+            expect(() => scheduler.unschedule('nonexistent')).to.not.throw()
+        })
+
+        it('stops a running task after unschedule', async () => {
+            let count = 0
+            scheduler.schedule('live', async () => { count++ }, { interval: 10, runImmediately: true })
+            scheduler.start()
+            await new Promise((resolve) => setTimeout(resolve, 25))
+            scheduler.unschedule('live')
+            const countAtRemoval = count
+            await new Promise((resolve) => setTimeout(resolve, 30))
+            scheduler.stop()
+            expect(count).to.equal(countAtRemoval)
+        })
+
+        it('returns scheduler for chaining', () => {
+            scheduler.schedule('chain2', async () => {}, { interval: 100 })
+            const ret = scheduler.unschedule('chain2')
+            expect(ret).to.equal(scheduler)
+        })
     })
 
     describe('start / stop', () => {
@@ -71,6 +93,26 @@ describe('Scheduler', () => {
             scheduler.stop()
             scheduler.stop()
             expect(scheduler.isRunning()).to.be.false
+        })
+        it('restart: start → stop → start resumes task execution', async () => {
+            let count = 0
+            scheduler.schedule('restart-task', async () => { count++ }, { interval: 10, runImmediately: true })
+            scheduler.start()
+            await new Promise((resolve) => setTimeout(resolve, 25))
+            scheduler.stop()
+            const countAfterStop = count
+            await new Promise((resolve) => setTimeout(resolve, 30))
+            expect(count).to.equal(countAfterStop)
+            scheduler.start()
+            await new Promise((resolve) => setTimeout(resolve, 25))
+            scheduler.stop()
+            expect(count).to.be.greaterThan(countAfterStop)
+        })
+        it('stop returns scheduler for chaining', () => {
+            expect(scheduler.stop()).to.equal(scheduler)
+        })
+        it('start returns scheduler for chaining', () => {
+            expect(scheduler.start()).to.equal(scheduler)
         })
     })
 
@@ -175,6 +217,25 @@ describe('Scheduler', () => {
             expect(status.info.interval).to.equal(500)
             expect(status.info.timeout).to.equal(5000)
             expect(status.info.inProcess).to.be.false
+        })
+
+        it('returns empty object when no tasks registered', () => {
+            const s = new Scheduler()
+            expect(scheduler.getStatus()).to.be.an('object')
+        })
+
+        it('reflects multiple tasks', () => {
+            scheduler.schedule('a', async () => {}, { interval: 100 })
+            scheduler.schedule('b', async () => {}, { interval: 200 })
+            const status = scheduler.getStatus()
+            expect(status.a).to.exist
+            expect(status.b).to.exist
+        })
+
+        it('task is absent from status after unschedule', () => {
+            scheduler.schedule('temp', async () => {}, { interval: 100 })
+            scheduler.unschedule('temp')
+            expect(scheduler.getStatus().temp).to.be.undefined
         })
     })
 })
