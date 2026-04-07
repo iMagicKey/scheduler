@@ -150,3 +150,14 @@ process.on('SIGTERM', () => {
 - **No persistence**: all state is in-memory. Tasks are lost on process restart.
 - **Concurrency**: multiple tasks run concurrently; each has its own `inProcess` flag. Only same-named task executions are serialized.
 - `onError` and `onTimeout` callbacks must not throw; exceptions inside them are not caught.
+
+---
+
+## Knowledge Base
+
+**KB tags for this library:** `imagic-scheduler, scheduler`
+
+Before COMPLEX tasks — invoke `knowledge-reader` with tags above + task-specific tags.
+After completing a task — if a reusable pattern, error, or decision emerged, invoke `knowledge-writer` with `source: imagic-scheduler`.
+
+See `CLAUDE.md` §Knowledge Base Protocol for the full workflow.

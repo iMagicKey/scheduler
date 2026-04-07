@@ -1,9 +1,11 @@
 # UPDATE — imagic-scheduler
 
-## Критические баги
-- нет
+> Audit performed: 2026-04-07. Version at time of audit: 1.0.1
 
-## Улучшения API (backlog)
+---
+
+## API improvements (backlog)
+
 - [ ] Cron expression support (e.g., '* * * * *')
 - [ ] Pause/resume individual tasks
 - [ ] Task run history (last N executions with timestamps/durations)
